@@ -170,7 +170,11 @@ function Home() {
   }
 
   if (status === GameStatus.LOADING || !availableLanguages.current || !currentSnippet || !language) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex min-h-[50vh] w-full items-center justify-center rounded-3xl border border-black/10 bg-white p-10 text-lg text-zinc-600">
+        Loading…
+      </div>
+    );
   }
 
   return (
