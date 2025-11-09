@@ -2,19 +2,16 @@ FROM node:22
 
 WORKDIR /app
 
-# Copy everything first (so prisma/ exists before npm ci)
 COPY . .
 
-# Install dependencies
-RUN npm ci
+# Force rebuild for correct platform
+RUN npm rebuild @tailwindcss/oxide --force || true
 
-# Build the Next.js app
+RUN npm ci
 RUN npm run build
 
-# Environment variables
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-
 EXPOSE 3000
 
 CMD ["npm", "run", "start"]
