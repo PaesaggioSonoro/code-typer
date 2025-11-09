@@ -1,17 +1,29 @@
+# Use Debian-based Node image (better build toolchain for ARM64)
 FROM node:20-bullseye
 
+# Set working directory
 WORKDIR /app
+
+# Copy dependency files first for caching
 COPY package*.json ./
 COPY prisma ./prisma/
 
-RUN apt-get update && apt-get install -y openssl python3 make g++ \
-  && npm install \
-  && npm install -g prisma
+# Install required system packages + Node dependencies
+RUN apt-get update && apt-get install -y \
+    openssl python3 make g++ \
+    && npm install \
+    && npm install -g prisma \
+    && npm rebuild lightningcss --build-from-source
 
+# Copy the rest of the source code
 COPY . .
 
+# Generate Prisma client and build app
 RUN npx prisma generate
 RUN npm run build
 
+# Expose the application port
 EXPOSE 3000
+
+# Start the production server
 CMD ["npm", "run", "start"]
