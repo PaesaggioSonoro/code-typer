@@ -9,11 +9,7 @@ COPY package*.json ./
 COPY prisma ./prisma/
 
 # Install required system packages + Node dependencies
-RUN apt-get update && apt-get install -y \
-    openssl python3 make g++ \
-    && npm install \
-    && npm install -g prisma \
-    && npm rebuild lightningcss --build-from-source
+RUN npm install
 
 # Copy the rest of the source code
 COPY . .
