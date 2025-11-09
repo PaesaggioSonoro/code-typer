@@ -1,26 +1,18 @@
-FROM node:22
+FROM node:20-alpine
 
 WORKDIR /app
 
+COPY package*.json ./
+COPY prisma ./prisma/
+
+RUN apk add --no-cache openssl3 python3 make g++ \
+  && npm install \
+  && npm install -g prisma
+
 COPY . .
 
-# Clean cache to ensure npm detects architecture correctly
-RUN npm cache clean --force
-
-# Install all dependencies
-RUN npm ci
-
-# Rebuild TailwindCSS oxide native module for this platform
-RUN npm rebuild @tailwindcss/oxide --force || true
-
-# Optional: Verify correct binary downloaded
-RUN ls -1 node_modules/@tailwindcss/oxide-* || true
-
-# Build Next.js app
+RUN npx prisma generate
 RUN npm run build
-
-ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
 
 EXPOSE 3000
 CMD ["npm", "run", "start"]
