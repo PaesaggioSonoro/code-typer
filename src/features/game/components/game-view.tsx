@@ -4,10 +4,11 @@ import {GameStatus} from "@/features/game/types/game-status";
 import type {ILanguage} from "@/shared/types/language";
 import {humanizeTime} from "@/features/game/utils/typing-metrics";
 import {useGameStore} from "../state/game-store";
-import {useCallback, useState} from "react";
+import {useCallback, useMemo, useState} from "react";
 import SettingsModal from "@/features/settings/components/modal";
 import {IoClose, IoSettingsSharp} from "react-icons/io5";
 import useSettingsStore from "@/features/settings/stores/settings-store";
+import LanguageMenu from "@/features/game/components/language-menu";
 
 interface IGameViewProps {
   onGameFinished: () => void;
@@ -73,6 +74,7 @@ function GameView(props: IGameViewProps) {
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [isTutorialOpen, setIsTutorialOpen] = useState(false);
   const [isDocsOpen, setIsDocsOpen] = useState(false);
+  const languageOptions = useMemo(() => Object.values(availableLanguages).sort((a, b) => a.name.localeCompare(b.name)), [availableLanguages]);
 
   const handleSnippetFinished = useCallback(() => {
     onGameFinished();
@@ -178,21 +180,18 @@ function GameView(props: IGameViewProps) {
             >
               {!isRefreshing ? "Change snippet" : "Wait"}
             </button>
-            <select
-              disabled={isRefreshing}
-              value={language.id}
-              onChange={(event) => {
-                setStatus(GameStatus.LOADING);
-                changeLanguage(availableLanguages[event.target.value]);
-              }}
-              className="flex-1 rounded-xl border border-black/10 bg-white px-4 py-3 text-sm font-semibold text-black disabled:opacity-40"
-            >
-              {Object.values(availableLanguages).map((availableLanguage) => (
-                <option key={availableLanguage.id} value={availableLanguage.id}>
-                  {availableLanguage.name}
-                </option>
-              ))}
-            </select>
+            <div className="flex-1">
+              <LanguageMenu
+                languages={languageOptions}
+                selectedLanguageId={language.id}
+                disabled={isRefreshing}
+                onSelect={(nextLanguage) => {
+                  if (nextLanguage.id === language.id) return;
+                  setStatus(GameStatus.LOADING);
+                  changeLanguage(nextLanguage);
+                }}
+              />
+            </div>
           </div>
         </div>
       </div>
